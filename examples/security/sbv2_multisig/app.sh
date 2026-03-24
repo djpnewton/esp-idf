@@ -90,11 +90,11 @@ sign_binary() {
     done
 
     # Apply the signatures to the binary file
-    espsecure sign-data --version 2 --pub-key "${PUB_KEY_ARGS[@]}" --signature "${SIG_ARGS[@]}" --output "$OUTPUT_FILE" "$INPUT_FILE"
+    espsecure.py sign_data --version 2 --pub-key "${PUB_KEY_ARGS[@]}" --signature "${SIG_ARGS[@]}" --output "$OUTPUT_FILE" "$INPUT_FILE"
 
     echo "Successfully signed $INPUT_FILE with $NUM_SIGS key(s). Signed file: $OUTPUT_FILE"
     echo "Signature information:"
-    espsecure signature-info-v2 "$OUTPUT_FILE"
+    espsecure.py signature_info_v2 "$OUTPUT_FILE"
 }
 
 if [ "$SIGN" -eq 1 ]; then
@@ -134,7 +134,7 @@ elif [ "$QEMU" -eq 1 ]; then
     sed "s|$BIN_NAME|$SIGNED_BIN_NAME|g" "$FLASH_ARGS_FILE" > "$FLASH_ARGS_SIGNED_FILE"
     sed -i "s|$BOOTLOADER_NAME|$SIGNED_BOOTLOADER_NAME|g" "$FLASH_ARGS_SIGNED_FILE"
     echo "Updated flash arguments file with signed binaries: $FLASH_ARGS_SIGNED_FILE"
-    esptool --chip esp32s3 merge-bin -o "$MERGED_BIN_FILE" --pad-to-size 4MB @"$FLASH_ARGS_SIGNED_FILE"
+    esptool.py --chip esp32s3 merge_bin -o "$MERGED_BIN_FILE" --fill-flash-size 4MB @"$FLASH_ARGS_SIGNED_FILE"
     cd ..
     MERGED_BIN_FILE="build/$MERGED_BIN_FILE"
     echo "Merged binary for QEMU: $MERGED_BIN_FILE"
