@@ -631,7 +631,11 @@ esp_err_t bootloader_flash_erase_range(uint32_t start_addr, uint32_t size)
         return ESP_ERR_INVALID_SIZE;
     }
     size_t start = start_addr / FLASH_SECTOR_SIZE;
-    size_t end = start + size / FLASH_SECTOR_SIZE;
+    size_t num_sectors = size / FLASH_SECTOR_SIZE;
+    if (num_sectors > SIZE_MAX - start) {
+        return ESP_ERR_INVALID_SIZE;
+    }
+    size_t end = start + num_sectors;
     const size_t sectors_per_block = FLASH_BLOCK_SIZE / FLASH_SECTOR_SIZE;
 
     esp_rom_spiflash_result_t rc = ESP_ROM_SPIFLASH_RESULT_OK;
