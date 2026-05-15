@@ -359,6 +359,10 @@ static int get_active_otadata_with_check_anti_rollback(const bootloader_state_t 
     valid_otadata[1] = bootloader_common_ota_select_valid(&two_otadata[1]);
 
     bool sec_ver_valid_otadata[2] = { 0 };
+    if (bs->app_count == 0) {
+        return -1;
+    }
+
     for (int i = 0; i < 2; ++i) {
         if (valid_otadata[i] == true) {
             ota_seq = two_otadata[i].ota_seq - 1; // Raw OTA sequence number. May be more than # of OTA slots
@@ -441,6 +445,9 @@ int bootloader_utility_get_selected_boot_partition(const bootloader_state_t *bs)
         if (active_otadata != -1) {
             ESP_LOGD(TAG, "Active otadata[%d]", active_otadata);
             uint32_t ota_seq = otadata[active_otadata].ota_seq - 1; // Raw OTA sequence number. May be more than # of OTA slots
+            if (bs->app_count == 0) {
+                return INVALID_INDEX;
+            }
             boot_index = ota_seq % bs->app_count; // Actual OTA partition selection
             ESP_LOGD(TAG, "Mapping seq %"PRIu32" -> OTA slot %d", ota_seq, boot_index);
 #ifdef CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE
@@ -533,7 +540,7 @@ void bootloader_utility_load_boot_image_from_deep_sleep(void)
             esp_ota_select_entry_t otadata[2];
             if (bs.ota_info.size && bootloader_common_read_otadata(&bs.ota_info, otadata) == ESP_OK) {
                 int active_otadata = bootloader_common_get_active_otadata(otadata);
-                if (active_otadata != -1) {
+                if (active_otadata != -1 && bs.app_count > 0) {
                     index_of_last_loaded_app = (otadata[active_otadata].ota_seq - 1) % bs.app_count;
                 }
             }
