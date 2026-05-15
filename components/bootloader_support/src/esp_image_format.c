@@ -577,6 +577,9 @@ static esp_err_t process_segments(esp_image_metadata_t *data, bool silent, bool 
     esp_err_t err = ESP_OK;
     uint32_t start_segments = data->start_addr + data->image_len;
     uint32_t next_addr = start_segments;
+    if (data->image.segment_count > ESP_IMAGE_MAX_SEGMENTS) {
+        FAIL_LOAD("image segment count %d exceeds max %d", data->image.segment_count, ESP_IMAGE_MAX_SEGMENTS);
+    }
     for (int i = 0; i < data->image.segment_count; i++) {
         esp_image_segment_header_t *header = &data->segments[i];
         ESP_LOGV(TAG, "loading segment header %d at offset 0x%"PRIx32, i, next_addr);
